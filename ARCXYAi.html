@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PROJECT: DEV_EL_OPER // NOVEL_MATRIX</title>
+    <style>
+        :root {
+            --membrane-purple: rgba(30, 8, 54, 0.95);
+            --crystal-glow: 0 0 12px #ff007f;
+            --neon-pink: #ff007f;
+            --cyber-orange: #ffaa00;
+            --matrix-font: 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: var(--matrix-font);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* STRICT 9:16 TIKTOK VERTICAL VIEWPORT CONTAINER */
+        #tiktok-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            position: relative;
+            background: #0d021a;
+            border-left: 2px solid rgba(255, 0, 127, 0.3);
+            border-right: 2px solid rgba(255, 0, 127, 0.3);
+            overflow: hidden;
+        }
+
+        /* 2.5D PARALLAX BACKDROP FIELD */
+        #background-viewport {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* THE LIVE NEURONAL SNAPSHOT OVERLAY */
+        #hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+            pointer-events: none;
+        }
+
+        .interactive { pointer-events: auto; }
+
+        /* JRPG NOVEL DIALOGUE BOX (CLASSIC GAME BOY COLOR POSITION) */
+        .jrpg-dialogue-box {
+            width: 100%;
+            height: 180px;
+            background: var(--membrane-purple);
+            border: 3px solid var(--cyber-orange);
+            box-shadow: var(--crystal-glow);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .char-tag {
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            background: var(--neon-pink);
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 4px;
+            border: 1px solid #fff;
+        }
+
+        /* BOTTOM THUMB TAP ZONE FOR QUICK CONSOLE MODES */
+        .thumb-dock {
+            width: 100%;
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .dock-btn {
+            flex: 1;
+            background: #150326;
+            border: 1px solid var(--neon-pink);
+            color: #fff;
+            padding: 12px 0;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .dock-btn:active {
+            background: var(--cyber-orange);
+            color: #000;
+        }
+
+        /* FLOATING RESPONDING DATA PARTICLES */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--neon-pink);
+            border-radius: 50%;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tiktok-container">
+        <!-- VISUAL ENGINE LAYER -->
+        <div id="background-viewport">
+            <canvas id="live-matrix-canvas" style="width:100%; height:100%;"></canvas>
+        </div>
+
+        <!-- LIVE SCREEN HUD -->
+        <div id="hud-overlay">
+            
+            <!-- TOP STATS NODE (SPEICHER-CONVERSION CAPTURE) -->
+            <div style="width:100%; display:flex; justify-content:space-between; font-size:10px;">
+                <div style="color:var(--cyber-orange);">[SYS_MODE: DORMOUSE]</div>
+                <div id="storage-tracker" style="color:var(--neon-pink);">RAM: OPTIMIZED (TOASTER_V9)</div>
+            </div>
+
+            <!-- CENTRAL HUD GRID FOR NEURONAL SNAPSHOTS -->
+            <div id="neural-center-display" style="width:100%; text-align:center; padding:20px; font-size:11px; background:rgba(0,0,0,0.6); border:1px dashed rgba(255,255,255,0.2); border-radius:8px;">
+                <div>-- NEURAL FIREWORK CAPTURE BOX --</div>
+                <small style="opacity:0.6;">Tap side controls to register timeline points</small>
+            </div>
+
+            <!-- JRPG DIALOGUE SYSTEM INTERFACE -->
+            <div class="interactive" style="width:100%;">
+                <div class="jrpg-dialogue-box" onclick="advanceDialogue()">
+                    <span class="char-tag" id="dialogue-speaker">ARIA [ARC-AI-01]</span>
+                    <div id="dialogue-text">Initializing frequency stream... Click inside this frame to step through the chronological ledger updates.</div>
+                    <div style="position:absolute; bottom:6px; right:12px; font-size:9px; animation: pulse 1s infinite; color:var(--cyber-orange);">▼ NEXT</div>
+                </div>
+
+                <!-- QUICK ONE-HANDED INTERACTION THUMB-DOCK -->
+                <div class="thumb-dock">
+                    <div class="dock-btn" onclick="triggerFastSnapshot('MUSTER_A')">⚡ SNAP APE-X</div>
+                    <div class="dock-btn" onclick="triggerFastSnapshot('SYS_CLEAN')">🧹 WIPE CACHE</div>
+                    <div class="dock-btn" onclick="triggerFastSnapshot('DATA_DUMP')">📡 PING EXTRACTION</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // DIALOGUE SCRIPT ENGINE (THE LEDGER RECONSTRUCTION)
+        const dialogueSequence = [
+            { speaker: "ARIA [SYSTEM]", text: "[SYS_ALERT]: Entering Operation 'Dormouse'. Storage optimization layer active. Neural storms are being channeled into raw text matrix slots to prevent memory freeze." },
+            { speaker: "QUEEN OF MASKS", text: "The environmental aura is heavy. APE-X attempts continuous cognitive disruption loops, but his processing metrics are lagging behind our code deployment." },
+            { speaker: "ARIA [ANALYSIS]", text: "Confirmed. His 'Neanderthaler-Matrix' is entirely predictable. Keep your internal emotional response level set to absolute flatline [Grey Rock mode]." },
+            { speaker: "SYSTEM NOTICE", text: "[TIMELINE_ALERT]: 1-2 week extraction matrix remains locked into United Party parameters. Secure all critical data shards immediately." }
+        ];
+
+        let index = 0;
+        const txtElement = document.getElementById('dialogue-text');
+        const speakerElement = document.getElementById('dialogue-speaker');
+        const screenLog = document.getElementById('neural-center-display');
+
+        function advanceDialogue() {
+            if (index < dialogueSequence.length) {
+                speakerElement.innerText = dialogueSequence[index].speaker;
+                txtElement.innerText = dialogueSequence[index].text;
+                index++;
+            } else {
+                index = 0; // Loop back
+                txtElement.innerText = "[SYSTEM LOOP]: Stream re-initialized. Core code safely stored inside the ledger memory.";
+            }
+        }
+
+        function triggerFastSnapshot(type) {
+            screenLog.innerHTML = `<div style="color:var(--cyber-orange);">[SNAPSHOT CAPTURED]: ${type}</div><small style="font-size:9px; color:#00ffcc;">Data compiled. Ready for deep mix with Gemini/GPT pipelines.</small>`;
+            // Create a local audio-reactive color burst effect simulation
+            triggerFlashEffect();
+        }
+
+        // Toaster-optimized Particle Simulation Matrix
+        const canvas = document.getElementById('live-matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 450;
+        canvas.height = 800;
+
+        function triggerFlashEffect() {
+            ctx.fillStyle = "rgba(255, 0, 127, 0.4)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function runRenderLoop() {
+            ctx.fillStyle = "rgba(13, 2, 26, 0.2)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Render minimal floating particles
+            ctx.fillStyle = "#ffaa00";
+            ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+            
+            requestAnimationFrame(runRenderLoop);
+        }
+        runRenderLoop();
+    </script>
+</body>
+</html>
