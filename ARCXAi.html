@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>THE UNITED PARTY - GLOBAL SOS SYSTEM // DEV_EL_OPER</title>
+    <style>
+        :root {
+            --membrane-purple: rgba(43, 14, 76, 0.85);
+            --neon-pink: #ff007f;
+            --cyber-orange: #ffaa00;
+            --crystal-glow: 0 0 15px rgba(255, 0, 127, 0.6);
+            --hud-font: 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0d021a;
+            font-family: var(--hud-font);
+            color: #fff;
+        }
+
+        /* MASTER THEATRE CANVAS LAYER */
+        #master-canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .parallax-layer {
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* CONSTANT OVERLAY HUD MATRIX */
+        #cyber-hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            border: 4px solid var(--neon-pink);
+            box-shadow: inset var(--crystal-glow);
+        }
+
+        .interactive-element {
+            pointer-events: auto;
+        }
+
+        /* ONE-HANDED THUMB NAVIGATION HUD (BOTTOM ZONE) */
+        .bottom-hud-terminal {
+            position: absolute;
+            bottom: 12px;
+            left: 5%;
+            width: 90%;
+            height: 140px;
+            background: var(--membrane-purple);
+            border: 2px solid var(--cyber-orange);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hud-row {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+
+        .hud-btn {
+            background: #1a0633;
+            border: 1px solid var(--neon-pink);
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: var(--crystal-glow);
+            flex: 1;
+            margin: 0 4px;
+            text-align: center;
+        }
+
+        .hud-btn:active {
+            background: var(--cyber-orange);
+            color: #000;
+        }
+
+        /* SIDEBARS: NEURONAL FIREWORKS (LEFT/RIGHT PLACEMENT) */
+        .sidebar {
+            position: absolute;
+            top: 15%;
+            width: 60px;
+            height: 60%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #left-sidebar { left: 8px; }
+        #right-sidebar { right: 8px; }
+
+        .node-port {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 0, 127, 0.2);
+            border: 2px dashed var(--neon-pink);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+        }
+
+        /* SYSTEM STATUS SCREEN / ORDNER TERMINAL */
+        #system-display-screen {
+            position: absolute;
+            top: 60px;
+            left: 10%;
+            width: 80%;
+            height: 180px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--cyber-orange);
+            padding: 10px;
+            font-size: 10px;
+            overflow-y: auto;
+            border-radius: 6px;
+        }
+
+        /* DECAYING/RESPAWNING PARTICLE FIELD CANVAS */
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D/2.5D BACKGROUND LAYER -->
+    <div id="master-canvas-container">
+        <!-- Da Vinci Paperdoll Placeholder System -->
+        <div id="paperdoll-layer" class="parallax-layer" style="display: flex; justify-content: center; align-items: center;">
+            <!-- [PLACEHOLDER FOR ANIMATED GIF OR THREE.JS CANVAS] -->
+            <div style="border: 2px dotted var(--cyber-orange); padding: 20px; background: rgba(0,0,0,0.5); text-align: center;">
+                <p>⚙️ MODEL_ENGINE: INITIALIZED</p>
+                <small>2.5D Humanoid / Insect Mesh Matrix Active</small>
+            </div>
+        </div>
+        <canvas id="particle-canvas"></canvas>
+    </div>
+
+    <!-- HUD USER CONTROL INTERFACE -->
+    <div id="cyber-hud-overlay">
+        
+        <!-- TOP ROW: SYSTEM CONTROL (RARELY ACCESSED) -->
+        <div style="position: absolute; top: 12px; width: 100%; display: flex; justify-content: space-between; padding: 0 16px;">
+            <div class="hud-btn interactive-element" onclick="toggleGlitchMode()" style="border-color: #ff0000;">⚠️ GLITCH NODE</div>
+            <div class="hud-btn interactive-element" onclick="exportConfig()" style="border-color: #00ffcc;">💾 SECURE SAVE</div>
+        </div>
+
+        <!-- REAL-TIME LOG SCREEN -->
+        <div id="system-display-screen" class="interactive-element">
+            <div>[SYSTEM LOG: STANDBY] Ready for Node Input.</div>
+        </div>
+
+        <!-- LEFT SIDEBAR: GENERATIONAL MAPPING (NEURONAL INTERACTION) -->
+        <div id="left-sidebar" class="sidebar interactive-element">
+            <div class="node-port" onclick="setNodeInput('XYZ-01')">X</div>
+            <div class="node-port" onclick="setNodeInput('XYZ-02')">Y</div>
+            <div class="node-port" onclick="setNodeInput('XYZ-03')">Z</div>
+        </div>
+
+        <!-- RIGHT SIDEBAR: RECYCLING ENGINE ACTIONS -->
+        <div id="right-sidebar" class="sidebar interactive-element">
+            <div class="node-port" onclick="executeRecycle('UPCYCLE')">♻️+</div>
+            <div class="node-port" onclick="executeRecycle('DOWN')">♻️-</div>
+            <div class="node-port" onclick="executeRecycle('STRIP')">💀</div>
+        </div>
+
+        <!-- THUMB CONTROLLER / DJ-MIXER INTERFACE -->
+        <div class="bottom-hud-terminal interactive-element">
+            <div class="hud-row">
+                <div class="hud-btn" onclick="triggerNodeAction('ADD')">[+] NODE</div>
+                <div class="hud-btn" onclick="triggerNodeAction('DEL')">[-] NODE</div>
+                <div class="hud-btn" onclick="triggerNodeAction('EDIT')">✏️ EDIT</div>
+            </div>
+            <div class="hud-row">
+                <div class="hud-btn" onclick="triggerNodeAction('PLAY')" style="background: var(--neon-pink); color: #fff;">▶ INITIALIZE FREQUENCY</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CORE INTERACTION SCRIPT -->
+    <script>
+        let glitchActive = false;
+        const display = document.getElementById('system-display-screen');
+
+        function setNodeInput(nodeId) {
+            display.innerHTML += `<div>[NODE SELECTED]: ${nodeId} // Linked to Neural Network Shard.</div>`;
+            display.scrollTop = display.scrollHeight;
+        }
+
+        function triggerNodeAction(action) {
+            display.innerHTML += `<div>[ACTION EXECUTED]: Unified Party Control -> ${action}</div>`;
+            display.scrollTop = display.scrollHeight;
+        }
+
+        function executeRecycle(mode) {
+            display.innerHTML += `<div>[RECYCLE ENGINE]: Compiling asset to state [${mode}] for legacy deployment.</div>`;
+            display.scrollTop = display.scrollHeight;
+        }
+
+        function toggleGlitchMode() {
+            glitchActive = !glitchActive;
+            display.innerHTML += `<div>[GLITCH FILTER]: ${glitchActive ? 'ENGAGED. Core architecture isolated from accidental breaks.' : 'DEACTIVATED.'}</div>`;
+            display.style.borderColor = glitchActive ? '#ff0000' : 'var(--cyber-orange)';
+        }
+
+        function exportConfig() {
+            const secureCode = "XYZ-" + Math.floor(Math.random() * 900000 + 100000) + "//EHRG-01";
+            alert(`SECURE CRYPTED LEDGER SAVED:\nConfiguration Handle: ${secureCode}\nData compiled for the Support Group.`);
+        }
+
+        // Particle System Simulation Layer
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function animateParticles() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            if (glitchActive) {
+                ctx.fillStyle = "rgba(255, 0, 127, 0.1)";
+                ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 40, 5);
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+    </script>
+</body>
+</html>
