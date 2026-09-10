@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARC ARIA II ✨ ASTRA CHILD — Interactive Narrative Ledger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 180px;
+            max-height: 220px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 200px;
+            }
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(192, 132, 252, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glass-dock {
+            background: rgba(10, 15, 30, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            box-shadow: 0 12px 40px rgba(147, 51, 234, 0.25);
+        }
+        .glitch-active {
+            background-color: #000000 !important;
+            color: #22c55e !important;
+            font-family: monospace !important;
+        }
+        .glitch-active .glass-panel,
+        .glitch-active .glass-dock {
+            background: #050505 !important;
+            border: 1px solid #22c55e !important;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2) !important;
+            color: #22c55e !important;
+        }
+        .glitch-active button, 
+        .glitch-active input, 
+        .glitch-active select, 
+        .glitch-active textarea {
+            background: #0a0a0a !important;
+            color: #22c55e !important;
+            border-color: #22c55e !important;
+            font-family: monospace !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.4);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body id="app-body" class="h-full bg-slate-950 text-slate-100 overflow-x-hidden font-sans select-none">
+
+<canvas id="three-canvas" class="fixed inset-0 w-full h-full z-0 pointer-events-auto"></canvas>
+
+<header id="app-header" class="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-purple-500/30 px-4 py-2.5 flex justify-between items-center transition-all duration-300">
+    <div class="flex items-center gap-3">
+        <div class="w-3 h-3 rounded-full bg-purple-500 animate-pulse shadow-[0_0_10px_#c084fc]"></div>
+        <div>
+            <h1 class="text-sm font-bold tracking-wider text-purple-200 uppercase flex items-center gap-1.5">
+                <span>✦ ARC ARIA II</span>
+                <span class="text-xs text-cyan-400 font-normal">✨ ASTRA CHILD</span>
+            </h1>
+            <p class="text-[10px] text-slate-400">2.5D Poly Pocket Dollhouse & Universal Ledger</p>
+        </div>
+    </div>
+
+    <div class="hidden sm:flex items-center gap-6 text-xs text-slate-300">
+        <div class="flex flex-col items-center">
+            <span class="text-[9px] uppercase tracking-widest text-slate-400">FPS / GPU Load</span>
+            <span id="fps-counter" class="font-mono text-cyan-300 font-semibold">60.0 FPS</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <span class="text-[9px] uppercase tracking-widest text-slate-400">Stardust Drift</span>
+            <span id="particle-counter" class="font-mono text-purple-300 font-semibold">1,000 Nodes</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <span class="text-[9px] uppercase tracking-widest text-slate-400">Ledger Anchors</span>
+            <span id="anchor-counter" class="font-mono text-emerald-300 font-semibold">4 Recorded</span>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <button id="glitch-toggle-btn" onclick="toggleGlitchProtection()" class="px-3 py-1.5 rounded-lg bg-purple-900/40 hover:bg-purple-800/60 border border-purple-400/40 text-purple-200 text-xs font-semibold tracking-wide transition flex items-center gap-1.5 active:scale-95 shadow-lg">
+            <span>⚡</span>
+            <span id="glitch-btn-text">COGNITIVE GLITCH ENGINE</span>
+        </button>
+    </div>
+</header>
+
+<main class="relative z-10 w-full h-full pointer-events-none pt-16 pb-44 px-3 sm:px-6 flex justify-between gap-4">
+    
+    <aside id="left-sidebar" class="pointer-events-auto w-72 lg:w-80 flex-shrink-0 flex flex-col gap-3 transition-all duration-300 hidden md:flex">
+        <div class="glass-panel rounded-xl p-3 flex flex-col gap-2">
+            <div class="flex justify-between items-center border-b border-purple-500/20 pb-2">
+                <span class="text-xs font-bold text-purple-300 tracking-wider flex items-center gap-1.5">
+                    <span>🧠</span> NEURONAL FIREWORKS
+                </span>
+                <span class="text-[10px] bg-purple-950 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/30">REAL-TIME</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-snug">
+                Sub-neural spark engine visualizing active thought density and locomotion impulses inside the Dollhouse membrane.
+            </p>
+            <div class="w-full h-24 bg-slate-950/80 rounded-lg border border-purple-500/20 overflow-hidden relative">
+                <canvas id="neuronal-canvas" class="w-full h-full block"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-xl p-3 flex flex-col gap-2 flex-1">
+            <div class="flex justify-between items-center border-b border-purple-500/20 pb-2">
+                <span class="text-xs font-bold text-cyan-300 tracking-wider flex items-center gap-1.5">
+                    <span>📊</span> SYNAPTIC DENSITY
+                </span>
+                <span id="synapse-rate" class="text-[10px] font-mono text-cyan-400">84.2 Hz</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="neuralChart"></canvas>
+            </div>
+            <div class="mt-auto pt-2 border-t border-purple-500/20">
+                <div class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Active Impulses</div>
+                <div id="synapse-feed" class="text-[11px] font-mono space-y-1 max-h-24 overflow-y-auto custom-scrollbar">
+                    <div class="text-purple-300">◈ Core_Membrane_Pulse [Active]</div>
+                    <div class="text-cyan-300">◈ FBM_Decay_Loop [Stabilized]</div>
+                    <div class="text-emerald-300">◈ Anchor_Write_Sync [Ready]</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col items-center justify-start pointer-events-none">
+        <div id="inspector-overlay" class="pointer-events-auto glass-panel rounded-2xl p-4 max-w-sm w-full text-center transition-all duration-300 opacity-90 hover:opacity-100 shadow-2xl mt-4 border border-cyan-400/30">
+            <div class="text-xs font-mono text-cyan-400 tracking-widest uppercase mb-1">Interactive Poly Pocket Dollhouse Core</div>
+            <h2 id="active-node-title" class="text-base font-bold text-purple-200">ASTRA CHAMBER 01</h2>
+            <p id="active-node-desc" class="text-xs text-slate-300 my-2 leading-relaxed">
+                Click or drag anywhere on the central 3D canvas to orient the Crystalline Purple Plastic Chamber. Trigger narrative anchors below to spawn glowing stardust vector nodes.
+            </p>
+            <div class="flex justify-center gap-2 mt-2 text-[10px] font-mono">
+                <span class="px-2 py-0.5 rounded bg-purple-900/50 text-purple-300 border border-purple-500/30">IOR: 1.40</span>
+                <span class="px-2 py-0.5 rounded bg-cyan-900/50 text-cyan-300 border border-cyan-500/30">Fresnel Glow: High</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-900/50 text-emerald-300 border border-emerald-500/30">FBM Noise: Active</span>
+            </div>
+        </div>
+    </div>
+
+    <aside id="right-sidebar" class="pointer-events-auto w-72 lg:w-80 flex-shrink-0 flex flex-col gap-3 transition-all duration-300 hidden md:flex">
+        <div class="glass-panel rounded-xl p-3 flex flex-col gap-2">
+            <div class="flex justify-between items-center border-b border-purple-500/20 pb-2">
+                <span class="text-xs font-bold text-emerald-300 tracking-wider flex items-center gap-1.5">
+                    <span>♻️</span> RECYCLING RAILS
+                </span>
+                <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">98.4% EFFICIENT</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="recyclingChart"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-xl p-3 flex flex-col gap-2 flex-1">
+            <div class="flex justify-between items-center border-b border-purple-500/20 pb-2">
+                <span class="text-xs font-bold text-purple-300 tracking-wider flex items-center gap-1.5">
+                    <span>📟</span> RAW TELEMETRY STREAM
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">HEX_LOG</span>
+            </div>
+            <div id="hex-stream" class="font-mono text-[10px] text-purple-300/80 bg-slate-950/90 rounded-lg p-2 h-28 overflow-y-auto custom-scrollbar border border-purple-500/20 leading-tight">
+                0x7F8A1 :: STARDUST_ALPHA_DECAY [0.98]<br>
+                0x7F8A2 :: RECYCLED_MEMBRANE_VECTOR<br>
+                0x7F8A3 :: FRESNEL_HIGHLIGHT_PASS_OK<br>
+                0x7F8A4 :: LEDGER_ANCHOR_STATE_SYNC<br>
+                0x7F8A5 :: AUDIO_LOC_NODE_STABLE<br>
+            </div>
+
+            <div class="mt-2 space-y-2 text-xs">
+                <div>
+                    <div class="flex justify-between text-[11px] text-slate-300 mb-1">
+                        <span>Particle Decay Rate</span>
+                        <span id="decay-val" class="font-mono text-cyan-300">0.005</span>
+                    </div>
+                    <input id="decay-slider" type="range" min="0.001" max="0.02" step="0.001" value="0.005" oninput="updateDecayRate(this.value)" class="w-full accent-purple-500 cursor-pointer">
+                </div>
+                <div>
+                    <div class="flex justify-between text-[11px] text-slate-300 mb-1">
+                        <span>Chamber Spin Speed</span>
+                        <span id="spin-val" class="font-mono text-purple-300">1.0x</span>
+                    </div>
+                    <input id="spin-slider" type="range" min="0" max="3" step="0.2" value="1" oninput="updateSpinSpeed(this.value)" class="w-full accent-cyan-500 cursor-pointer">
+                </div>
+            </div>
+        </div>
+    </aside>
+
+</main>
+
+<div id="bottom-dock" class="fixed bottom-3 left-1/2 -translate-x-1/2 w-[96%] max-w-4xl z-50 pointer-events-auto transition-all duration-300">
+    <div class="glass-dock rounded-2xl p-3 sm:p-4 border border-purple-500/40">
+        
+        <div class="flex items-center justify-between border-b border-purple-500/30 pb-2 mb-3 overflow-x-auto custom-scrollbar gap-2">
+            <div class="flex gap-1 sm:gap-2">
+                <button onclick="switchDockTab('input')" id="tab-btn-input" class="dock-tab-btn px-3 py-1.5 rounded-lg bg-purple-600/40 text-purple-100 font-semibold text-xs border border-purple-400/40 transition flex items-center gap-1.5 whitespace-nowrap">
+                    <span>✦</span> Narrative Input
+                </button>
+                <button onclick="switchDockTab('ledger')" id="tab-btn-ledger" class="dock-tab-btn px-3 py-1.5 rounded-lg bg-slate-800/60 text-slate-300 hover:text-white font-semibold text-xs border border-transparent transition flex items-center gap-1.5 whitespace-nowrap">
+                    <span>📜</span> Universal Ledger (<span id="ledger-count-badge">4</span>)
+                </button>
+                <button onclick="switchDockTab('vector')" id="tab-btn-vector" class="dock-tab-btn px-3 py-1.5 rounded-lg bg-slate-800/60 text-slate-300 hover:text-white font-semibold text-xs border border-transparent transition flex items-center gap-1.5 whitespace-nowrap">
+                    <span>⚡</span> Vector Tuning
+                </button>
+                <button onclick="switchDockTab('metrics')" id="tab-btn-metrics" class="dock-tab-btn px-3 py-1.5 rounded-lg bg-slate-800/60 text-slate-300 hover:text-white font-semibold text-xs border border-transparent transition flex items-center gap-1.5 whitespace-nowrap md:hidden">
+                    <span>📊</span> Metrics
+                </button>
+            </div>
+            <div class="text-[10px] font-mono text-purple-300 hidden sm:block">
+                ONE-HANDED HUD [THUMB ARC OPTIMIZED]
+            </div>
+        </div>
+
+        <div id="dock-pane-input" class="dock-pane flex flex-col gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div class="sm:col-span-2">
+                    <input id="ledger-text-input" type="text" placeholder="Record narrative string or sensory insight..." class="w-full bg-slate-900/90 border border-purple-500/40 rounded-xl px-3 py-2 text-xs text-purple-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400 transition">
+                </div>
+                <div class="flex gap-2">
+                    <select id="ledger-category-select" class="w-1/2 bg-slate-900/90 border border-purple-500/40 rounded-xl px-2 py-2 text-xs text-purple-200 focus:outline-none focus:border-cyan-400">
+                        <option value="Neural Memory">Neural Memory</option>
+                        <option value="Astra Locomotion">Astra Locomotion</option>
+                        <option value="Crystalline Core">Crystalline Core</option>
+                        <option value="Glitch Event">Glitch Event</option>
+                    </select>
+                    <button onclick="submitLedgerAnchor()" class="w-1/2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl px-3 py-2 transition shadow-lg active:scale-95 flex items-center justify-center gap-1">
+                        <span>✦</span> ANCHOR
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-1">
+                <span class="flex items-center gap-2">
+                    <span>Vector Power Intensity:</span>
+                    <input id="ledger-power-range" type="range" min="10" max="100" value="75" oninput="document.getElementById('power-val').innerText = this.value + '%'" class="w-24 accent-cyan-400 cursor-pointer">
+                    <span id="power-val" class="font-mono text-cyan-300">75%</span>
+                </span>
+                <span class="hidden sm:inline text-purple-300">Submitting triggers instant 3D stardust node particle burst</span>
+            </div>
+        </div>
+
+        <div id="dock-pane-ledger" class="dock-pane hidden flex flex-col gap-2">
+            <div class="flex justify-between items-center gap-2 mb-1">
+                <input id="ledger-search-input" onkeyup="filterLedger()" type="text" placeholder="Search ledger anchors..." class="bg-slate-900/80 border border-purple-500/30 rounded-lg px-2.5 py-1 text-xs text-slate-200 w-48 focus:outline-none focus:border-purple-400">
+                <span class="text-[10px] text-slate-400">Click entry to focus camera node</span>
+            </div>
+            <div id="ledger-list-container" class="max-h-28 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
+            </div>
+        </div>
+
+        <div id="dock-pane-vector" class="dock-pane hidden flex flex-col gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div class="glass-panel p-2 rounded-lg">
+                    <label class="block text-slate-300 text-[11px] mb-1">Particle Density</label>
+                    <div class="flex items-center gap-2">
+                        <input id="density-slider" type="range" min="200" max="2000" step="100" value="1000" onchange="rebuildParticles(this.value)" class="w-full accent-purple-500">
+                        <span id="density-val" class="font-mono text-purple-300 text-[10px]">1000</span>
+                    </div>
+                </div>
+                <div class="glass-panel p-2 rounded-lg">
+                    <label class="block text-slate-300 text-[11px] mb-1">Fresnel Glow Edge</label>
+                    <div class="flex items-center gap-2">
+                        <input id="fresnel-slider" type="range" min="0.1" max="2.0" step="0.1" value="1.0" oninput="updateFresnelGlow(this.value)" class="w-full accent-cyan-500">
+                        <span id="fresnel-val" class="font-mono text-cyan-300 text-[10px]">1.0x</span>
+                    </div>
+                </div>
+                <div class="glass-panel p-2 rounded-lg">
+                    <label class="block text-slate-300 text-[11px] mb-1">Simulated Audio Vector</label>
+                    <button onclick="triggerAudioVectorPulse()" class="w-full bg-cyan-900/50 hover:bg-cyan-800/60 border border-cyan-400/40 text-cyan-200 py-1 rounded text-[11px] font-mono transition">
+                        🔊 EMIT AUDIO LOC-PULSE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="dock-pane-metrics" class="dock-pane hidden flex flex-col gap-2">
+            <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                <div class="glass-panel p-2 rounded-lg">
+                    <div class="text-[10px] text-slate-400">Synaptic Density Rate</div>
+                    <div class="text-sm font-bold text-cyan-300 font-mono">84.2 Hz</div>
+                </div>
+                <div class="glass-panel p-2 rounded-lg">
+                    <div class="text-[10px] text-slate-400">Recycling Efficiency</div>
+                    <div class="text-sm font-bold text-emerald-300 font-mono">98.4%</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+let scene, camera, renderer, crystalGroup, mainCrystal, outerRing, particleSystem;
+let particlesCount = 1000;
+let particlePositions, particleAlphas, particleVelocities;
+let particleDecayRate = 0.005;
+let spinSpeedMultiplier = 1.0;
+let fresnelGlowIntensity = 1.0;
+let isGlitchMode = false;
+let animationFrameId = null;
+
+let neuralChartInstance, recyclingChartInstance;
+
+let ledgerData = [
+    { id: 1, time: '10:42:01', category: 'Crystalline Core', text: 'Poly Pocket dollhouse frame initialized with crystalline membrane ior 1.4', power: 85 },
+    { id: 2, time: '10:43:15', category: 'Astra Locomotion', text: 'Particle lifecycle FBM field vector adjusted for low decay rates', power: 62 },
+    { id: 3, time: '10:44:30', category: 'Neural Memory', text: 'Neuronal fireworks sidebar buffer initialized with real-time firing sparks', power: 94 },
+    { id: 4, time: '10:45:10', category: 'Glitch Event', text: 'Safe-state grid fallback benchmarked at 60fps on low-resource hardware', power: 45 }
+];
+
+function initThreeScene() {
+    const canvas = document.getElementById('three-canvas');
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0f0b1e, 0.035);
+
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 8);
+
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const ambientLight = new THREE.AmbientLight(0x3b0764, 1.5);
+    scene.add(ambientLight);
+
+    const dirLight1 = new THREE.DirectionalLight(0xc084fc, 2.5);
+    dirLight1.position.set(5, 10, 7);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 2.0);
+    dirLight2.position.set(-5, -5, -5);
+    scene.add(dirLight2);
+
+    crystalGroup = new THREE.Group();
+    scene.add(crystalGroup);
+
+    const mainGeo = new THREE.IcosahedronGeometry(1.8, 0);
+    const mainMat = new THREE.MeshPhysicalMaterial({
+        color: 0x8b5cf6,
+        emissive: 0x3b0764,
+        roughness: 0.15,
+        metalness: 0.1,
+        transmission: 0.85,
+        ior: 1.4,
+        transparent: true,
+        opacity: 0.85,
+        wireframe: false
+    });
+    mainCrystal = new THREE.Mesh(mainGeo, mainMat);
+    crystalGroup.add(mainCrystal);
+
+    const wireGeo = new THREE.IcosahedronGeometry(1.82, 0);
+    const wireMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.35
+    });
+    const wireMesh = new THREE.Mesh(wireGeo, wireMat);
+    crystalGroup.add(wireMesh);
+
+    const ringGeo = new THREE.TorusGeometry(2.8, 0.04, 16, 100);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xc084fc, wireframe: true, transparent: true, opacity: 0.6 });
+    outerRing = new THREE.Mesh(ringGeo, ringMat);
+    outerRing.rotation.x = Math.PI / 3;
+    crystalGroup.add(outerRing);
+
+    buildParticles(particlesCount);
+
+    window.addEventListener('resize', onWindowResize);
+    setupCanvasInteractivity();
+}
+
+function buildParticles(count) {
+    if (particleSystem) {
+        crystalGroup.remove(particleSystem);
+        particleSystem.geometry.dispose();
+        particleSystem.material.dispose();
+    }
+
+    particlesCount = parseInt(count);
+    const geometry = new THREE.BufferGeometry();
+    particlePositions = new Float32Array(particlesCount * 3);
+    particleAlphas = new Float32Array(particlesCount);
+    particleVelocities = new Float32Array(particlesCount * 3);
+
+    for (let i = 0; i < particlesCount; i++) {
+        particlePositions[i * 3] = (Math.random() - 0.5) * 12;
+        particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 12;
+        particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 12;
+
+        particleVelocities[i * 3] = (Math.random() - 0.5) * 0.015;
+        particleVelocities[i * 3 + 1] = (Math.random() - 0.5) * 0.015;
+        particleVelocities[i * 3 + 2] = (Math.random() - 0.5) * 0.015;
+
+        particleAlphas[i] = Math.random();
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    geometry.setAttribute('alpha', new THREE.BufferAttribute(particleAlphas, 1));
+
+    const particleTexture = createParticleTexture();
+
+    const pMaterial = new THREE.PointsMaterial({
+        color: 0xe9d5ff,
+        size: 0.1,
+        map: particleTexture,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+
+    particleSystem = new THREE.Points(geometry, pMaterial);
+    crystalGroup.add(particleSystem);
+
+    document.getElementById('particle-counter').innerText = `${particlesCount.toLocaleString()} Nodes`;
+    document.getElementById('density-val').innerText = particlesCount;
+}
+
+function createParticleTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.1, 'rgba(255, 255, 255, 0.9)');
+    gradient.addColorStop(0.3, 'rgba(192, 132, 252, 0.5)'); 
+    gradient.addColorStop(0.6, 'rgba(192, 132, 252, 0.1)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 64, 64);
+
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+}
+
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+let lastFrameTime = performance.now();
+let frameCount = 0;
+
+function setupCanvasInteractivity() {
+    const canvas = document.getElementById('three-canvas');
+    
+    canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging || !crystalGroup) return;
+        const deltaX = e.clientX - previousMousePosition.x;
+        const deltaY = e.clientY - previousMousePosition.y;
+
+        crystalGroup.rotation.y += deltaX * 0.008;
+        crystalGroup.rotation.x += deltaY * 0.008;
+
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            isDragging = true;
+            previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+        if (!isDragging || !crystalGroup || e.touches.length !== 1) return;
+        const deltaX = e.touches[0].clientX - previousMousePosition.x;
+        const deltaY = e.touches[0].clientY - previousMousePosition.y;
+
+        crystalGroup.rotation.y += deltaX * 0.008;
+        crystalGroup.rotation.x += deltaY * 0.008;
+
+        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => { isDragging = false; });
+}
+
+function animateThreeScene() {
+    if (isGlitchMode) return;
+
+    animationFrameId = requestAnimationFrame(animateThreeScene);
+
+    const now = performance.now();
+    frameCount++;
+    if (now - lastFrameTime >= 1000) {
+        const fps = (frameCount * 1000) / (now - lastFrameTime);
+        document.getElementById('fps-counter').innerText = `${fps.toFixed(1)} FPS`;
+        frameCount = 0;
+        lastFrameTime = now;
+    }
+
+    if (!isDragging) {
+        crystalGroup.rotation.y += 0.005 * spinSpeedMultiplier;
+        crystalGroup.rotation.x += 0.002 * spinSpeedMultiplier;
+    }
+
+    if (outerRing) {
+        outerRing.rotation.z -= 0.01 * spinSpeedMultiplier;
+    }
+
+    if (particleSystem) {
+        const positions = particleSystem.geometry.attributes.position.array;
+        for (let i = 0; i < particlesCount; i++) {
+            positions[i * 3] += particleVelocities[i * 3];
+            positions[i * 3 + 1] += particleVelocities[i * 3 + 1];
+            positions[i * 3 + 2] += particleVelocities[i * 3 + 2];
+
+            particleAlphas[i] -= particleDecayRate;
+
+            if (particleAlphas[i] <= 0) {
+                positions[i * 3] = (Math.random() - 0.5) * 6;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 6;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
+                particleAlphas[i] = 1.0;
+            }
+        }
+        particleSystem.geometry.attributes.position.needsUpdate = true;
+    }
+
+    renderer.render(scene, camera);
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function initCharts() {
+    const ctx1 = document.getElementById('neuralChart').getContext('2d');
+    neuralChartInstance = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: ['Memory', 'Locomotion', 'Core', 'Glitch'],
+            datasets: [{
+                label: 'Firing Rate (Hz)',
+                data: [94, 62, 85, 45],
+                backgroundColor: [
+                    'rgba(192, 132, 252, 0.7)',
+                    'rgba(56, 189, 248, 0.7)',
+                    'rgba(168, 85, 247, 0.7)',
+                    'rgba(244, 63, 94, 0.7)'
+                ],
+                borderColor: ['#c084fc', '#38bdf8', '#a855f7', '#f43f5e'],
+                borderWidth: 1.5,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                y: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: 'rgba(255, 255, 255, 0.05)' }, beginAtZero: true, max: 100 }
+            }
+        }
+    });
+
+    const ctx2 = document.getElementById('recyclingChart').getContext('2d');
+    recyclingChartInstance = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active Anchors', 'Stardust Decay', 'Glitch Buffer', 'Free Memory'],
+            datasets: [{
+                data: [35, 25, 15, 25],
+                backgroundColor: ['#c084fc', '#38bdf8', '#4ade80', 'rgba(51, 65, 85, 0.5)'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 9 }, boxWidth: 10 } }
+            },
+            cutout: '70%'
+        }
+    });
+}
+
+function initNeuronal2DCanvas() {
+    const canvas = document.getElementById('neuronal-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    let nodes = Array.from({ length: 15 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: (Math.random() - 0.5) * 1.5,
+        radius: Math.random() * 2 + 1,
+        pulse: Math.random() * Math.PI
+    }));
+
+    function drawSparks() {
+        if (isGlitchMode) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < nodes.length; i++) {
+            let n = nodes[i];
+            n.x += n.vx;
+            n.y += n.vy;
+            n.pulse += 0.05;
+
+            if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
+            if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, n.radius + Math.sin(n.pulse) * 0.8, 0, Math.PI * 2);
+            ctx.fillStyle = '#c084fc';
+            ctx.fill();
+
+            for (let j = i + 1; j < nodes.length; j++) {
+                let n2 = nodes[j];
+                let dist = Math.hypot(n.x - n2.x, n.y - n2.y);
+                if (dist < 55) {
+                    ctx.beginPath();
+                    ctx.moveTo(n.x, n.y);
+                    ctx.lineTo(n2.x, n2.y);
+                    ctx.strokeStyle = `rgba(56, 189, 248, ${1 - dist / 55})`;
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(drawSparks);
+    }
+    drawSparks();
+}
+
+function renderLedgerList(data = ledgerData) {
+    const container = document.getElementById('ledger-list-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (data.length === 0) {
+        container.innerHTML = `<div class="text-[11px] text-slate-500 italic py-2 text-center">No ledger entries found.</div>`;
+        return;
+    }
+
+    data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'glass-panel p-2 rounded-xl border border-purple-500/20 flex flex-col gap-1 cursor-pointer hover:border-cyan-400/50 transition';
+        div.onclick = () => focusLedgerNode(item);
+        div.innerHTML = `
+            <div class="flex justify-between items-center text-[10px]">
+                <span class="font-bold text-cyan-300">${item.category}</span>
+                <span class="font-mono text-slate-400">${item.time} | Pwr: ${item.power}%</span>
+            </div>
+            <div class="text-xs text-slate-200 leading-snug">${item.text}</div>
+        `;
+        container.appendChild(div);
+    });
+
+    document.getElementById('anchor-counter').innerText = `${ledgerData.length} Recorded`;
+    document.getElementById('ledger-count-badge').innerText = ledgerData.length;
+}
+
+function submitLedgerAnchor() {
+    const input = document.getElementById('ledger-text-input');
+    const category = document.getElementById('ledger-category-select').value;
+    const power = parseInt(document.getElementById('ledger-power-range').value);
+    const text = input.value.trim();
+
+    if (!text) {
+        input.classList.add('border-rose-500');
+        setTimeout(() => input.classList.remove('border-rose-500'), 1000);
+        return;
+    }
+
+    const now = new Date();
+    const newItem = {
+        id: Date.now(),
+        time: now.toTimeString().split(' ')[0],
+        category: category,
+        text: text,
+        power: power
+    };
+
+    ledgerData.unshift(newItem);
+    input.value = '';
+
+    renderLedgerList();
+    spawnBurstEffect();
+    appendHexLog(`0x${Math.floor(Math.random()*0xFFFF).toString(16).toUpperCase()} :: ANCHOR_WRITE [${category.toUpperCase()}]`);
+    updateNeuralChartData(category, power);
+
+    if (mainCrystal) {
+        mainCrystal.scale.set(1.25, 1.25, 1.25);
+        mainCrystal.material.emissive.setHex(0x22d3ee);
+        setTimeout(() => {
+            mainCrystal.scale.set(1, 1, 1);
+            mainCrystal.material.emissive.setHex(0x3b0764);
+        }, 400);
+    }
+}
+
+function filterLedger() {
+    const query = document.getElementById('ledger-search-input').value.toLowerCase();
+    const filtered = ledgerData.filter(item => 
+        item.text.toLowerCase().includes(query) || 
+        item.category.toLowerCase().includes(query)
+    );
+    renderLedgerList(filtered);
+}
+
+function focusLedgerNode(item) {
+    document.getElementById('active-node-title').innerText = item.category.toUpperCase();
+    document.getElementById('active-node-desc').innerText = `"${item.text}" — Power: ${item.power}% at ${item.time}`;
+    
+    if (mainCrystal) {
+        mainCrystal.scale.set(1.3, 1.3, 1.3);
+        setTimeout(() => mainCrystal.scale.set(1, 1, 1), 350);
+    }
+}
+
+function spawnBurstEffect() {
+    if (!particleSystem) return;
+    const positions = particleSystem.geometry.attributes.position.array;
+    for (let i = 0; i < 150; i++) {
+        const idx = Math.floor(Math.random() * particlesCount);
+        positions[idx * 3] = (Math.random() - 0.5) * 1.5;
+        positions[idx * 3 + 1] = (Math.random() - 0.5) * 1.5;
+        positions[idx * 3 + 2] = (Math.random() - 0.5) * 1.5;
+        particleAlphas[idx] = 1.0;
+    }
+    particleSystem.geometry.attributes.position.needsUpdate = true;
+}
+
+function appendHexLog(logText) {
+    const hexContainer = document.getElementById('hex-stream');
+    if (!hexContainer) return;
+    const line = document.createElement('div');
+    line.innerText = logText;
+    hexContainer.prepend(line);
+}
+
+function updateDecayRate(val) {
+    particleDecayRate = parseFloat(val);
+    document.getElementById('decay-val').innerText = val;
+}
+
+function updateSpinSpeed(val) {
+    spinSpeedMultiplier = parseFloat(val);
+    document.getElementById('spin-val').innerText = `${val}x`;
+}
+
+function updateFresnelGlow(val) {
+    fresnelGlowIntensity = parseFloat(val);
+    document.getElementById('fresnel-val').innerText = `${val}x`;
+    if (mainCrystal) {
+        mainCrystal.material.opacity = Math.min(0.95, 0.6 * val);
+    }
+}
+
+function rebuildParticles(val) {
+    buildParticles(val);
+    appendHexLog(`0x${Math.floor(Math.random()*0xFFFF).toString(16).toUpperCase()} :: DENSITY_UPDATE [${val}]`);
+}
+
+function triggerAudioVectorPulse() {
+    appendHexLog(`0x${Math.floor(Math.random()*0xFFFF).toString(16)} :: AUDIO_LOC_NODE_PING`);
+    spawnBurstEffect();
+}
+
+function updateNeuralChartData(category, power) {
+    if (!neuralChartInstance) return;
+    const catMap = { 'Neural Memory': 0, 'Astra Locomotion': 1, 'Crystalline Core': 2, 'Glitch Event': 3 };
+    const index = catMap[category];
+    if (index !== undefined) {
+        neuralChartInstance.data.datasets[0].data[index] = Math.min(100, neuralChartInstance.data.datasets[0].data[index] + Math.round(power / 10));
+        neuralChartInstance.update();
+    }
+}
+
+function switchDockTab(tabName) {
+    document.querySelectorAll('.dock-tab-btn').forEach(btn => {
+        btn.classList.remove('bg-purple-600/40', 'text-purple-100', 'border-purple-400/40');
+        btn.classList.add('bg-slate-800/60', 'text-slate-300', 'border-transparent');
+    });
+
+    const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+    if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-800/60', 'text-slate-300', 'border-transparent');
+        activeBtn.classList.add('bg-purple-600/40', 'text-purple-100', 'border-purple-400/40');
+    }
+
+    document.querySelectorAll('.dock-pane').forEach(pane => pane.classList.add('hidden'));
+    const activePane = document.getElementById(`dock-pane-${tabName}`);
+    if (activePane) activePane.classList.remove('hidden');
+}
+
+function toggleGlitchProtection() {
+    isGlitchMode = !isGlitchMode;
+    const body = document.getElementById('app-body');
+    const btnText = document.getElementById('glitch-btn-text');
+
+    if (isGlitchMode) {
+        body.classList.add('glitch-active');
+        btnText.innerText = 'EXIT SAFE GRID';
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        document.getElementById('three-canvas').style.display = 'none';
+        appendHexLog(`0xGLITCH :: ENGAGED_COGNITIVE_PROTECTION_ENGINE`);
+    } else {
+        body.classList.remove('glitch-active');
+        btnText.innerText = 'COGNITIVE GLITCH ENGINE';
+        document.getElementById('three-canvas').style.display = 'block';
+        animateThreeScene();
+        appendHexLog(`0xGLITCH :: RESTORED_CRYSTALLINE_3D_LAYER`);
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    initThreeScene();
+    animateThreeScene();
+    initCharts();
+    initNeuronal2DCanvas();
+    renderLedgerList();
+});
+</script>
+</body>
+</html>
